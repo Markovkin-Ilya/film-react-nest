@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@faker-js/faker": "^10.4.0",
+    "@nestjs/common": "^11.1.18",
+    "@nestjs/core": "^11.1.18",
+    "@nestjs/mongoose": "^11.0.4",
+    "@nestjs/platform-express": "^11.1.18",
+    "mongoose": "^9.4.1"
+  }
+}
