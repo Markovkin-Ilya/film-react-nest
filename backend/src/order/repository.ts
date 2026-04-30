@@ -1,41 +1,54 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { FilmDocument, Film } from '../films/schema';
-import { Model } from 'mongoose';
+import { Film } from '../films/entity/film';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Schedule } from '../films/entity/schedule';
 
 @Injectable()
 export class OrderRepository {
-  constructor(@InjectModel(Film.name) private filmModel: Model<FilmDocument>) {}
+  constructor(
+    @InjectRepository(Film)
+    private filmsRepository: Repository<Film>,
+    @InjectRepository(Schedule)
+    private scheduleRepository: Repository<Schedule>,
+  ) {}
 
   public async createOrder(item) {
-    const newSeat = `${item.row}:${item.seat}`;
-    await this.filmModel.updateOne(
-      { id: item.film, 'schedule.id': item.session },
-      { $push: { 'schedule.$.taken': newSeat } },
-    );
+    const schedule = await this.scheduleRepository.find({
+      where: { id: item.session },
+      select: { taken: true },
+    });
+    if (schedule && schedule.length > 0) {
+      const taken = schedule[0].taken;
+      const newSeat = `,${item.row}:${item.seat}`;
+      const newTaken = taken + newSeat;
+      this.scheduleRepository.update({ id: item.session }, { taken: newTaken });
+    }
   }
 
   public async checkSeats(ticket) {
     try {
-      const film = await this.filmModel.findOne({ id: ticket.film });
+      const film = await this.filmsRepository.find({
+        where: { id: ticket.film },
+      });
       if (!film) {
         throw new HttpException(
           'Фильма с таким id не существует',
           HttpStatus.NOT_FOUND,
         );
       }
-      const schedule = film.schedule.find((session) => {
-        return session.id == ticket.session;
+      const schedule = await this.scheduleRepository.find({
+        where: { id: ticket.session },
       });
-      if (!schedule) {
+      if (!schedule || schedule.length <= 0) {
         throw new HttpException(
           'Сеанса с таким id не существует',
           HttpStatus.NOT_FOUND,
         );
       }
       if (
-        schedule.rows < ticket.row ||
-        schedule.seats < ticket.seat ||
+        schedule[0].rows < ticket.row ||
+        schedule[0].seats < ticket.seat ||
         1 > ticket.row ||
         1 > ticket.seat
       ) {
@@ -45,13 +58,15 @@ export class OrderRepository {
         );
       }
       const seat = `${ticket.row}:${ticket.seat}`;
-      if (schedule.taken.includes(seat)) {
+      const regex = new RegExp(`(^|,)\\s*${seat}\\s*(,|$)`, 'i');
+      const isFound = regex.test(schedule[0].taken);
+      if (isFound) {
         throw new HttpException(
           'Выбранные места уже заняты',
           HttpStatus.CONFLICT,
         );
       }
-    } catch (error: unknown) {
+    } catch (error) {
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message:

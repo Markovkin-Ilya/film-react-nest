@@ -5,8 +5,8 @@ export const configProvider = {
   provide: 'CONFIG',
   useFactory: (): AppConfig => ({
     database: {
-      driver: process.env.DB_DRIVER || 'mongodb',
-      url: process.env.DB_URL || 'mongodb://localhost:27017/afisha',
+      driver: process.env.DATABASE_DRIVER || 'postgres',
+      url: process.env.DATABASE_URL || 'postgres://localhost:5432/films',
     },
   }),
   inject: [],

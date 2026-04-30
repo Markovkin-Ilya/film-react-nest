@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FilmsRepository } from './repository';
-import { Film } from './schema';
+import { Film } from './entity/film';
 
 @Injectable()
 export class FilmsService {
@@ -12,6 +12,6 @@ export class FilmsService {
   }
 
   public async getFilmById(id: string) {
-    return { items: (await this.filmsRepository.getFilmById({ id })).schedule };
+    return { items: await this.filmsRepository.getFilmById(id) };
   }
 }

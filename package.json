@@ -5,6 +5,7 @@
     "@nestjs/core": "^11.1.18",
     "@nestjs/mongoose": "^11.0.4",
     "@nestjs/platform-express": "^11.1.18",
+    "faker-js": "^1.0.0",
     "mongoose": "^9.4.1"
   }
 }
