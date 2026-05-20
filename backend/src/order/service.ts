@@ -10,7 +10,7 @@ export class OrderService {
     const tikets = { items: [] };
     dto.tickets.map((ticket) => {
       this.orderRepository.checkSeats(ticket);
-      const ticketResult = { ...ticket, id: faker.string.uuid() };
+      const ticketResult = { ...ticket, id: faker.datatype.uuid() };
       tikets.items.push(ticketResult);
     });
     const orderResult = { items: [] };
