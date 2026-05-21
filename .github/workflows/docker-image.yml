@@ -14,13 +14,11 @@ jobs:
       contents: write
     steps:
       - name: set lower case owner name
-        run: /
-          echo "REPO=${OWNER,,}" >>${GITHUB_ENV}
+        run: echo "REPO=${OWNER,,}" >>${GITHUB_ENV}
         env:
           OWNER: '${{ github.repository_owner }}'
 
-      - run: /
-          echo "repo ${REPO}"
+      - run: echo "repo ${REPO}"
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -41,23 +39,23 @@ jobs:
       - name: Build and push backend
         uses: docker/build-push-action@v6
         with:
-          context: '{{defaultConterxt}}:backend'
+          context: '{{defaultContext}}:backend'
           push: true
-          tegs: 'ghcr.io/${{ env.REPO }}/films_backend:latest'
+          tags: 'ghcr.io/${{ env.REPO }}/films_backend:latest'
 
       - name: Build and push frontend
         uses: docker/build-push-action@v6
         with:
-          context: '{{defaultConterxt}}:frontend'
+          context: '{{defaultContext}}:frontend'
           push: true
-          tegs: 'ghcr.io/${{ env.REPO }}/films_frontend:latest'
+          tags: 'ghcr.io/${{ env.REPO }}/films_frontend:latest'
 
       - name: Build and push server
         uses: docker/build-push-action@v6
         with:
-          context: '{{defaultConterxt}}:nginx'
+          context: '{{defaultContext}}:nginx'
           push: true
-          tegs: 'ghcr.io/${{ env.REPO }}/films_server:latest'
+          tags: 'ghcr.io/${{ env.REPO }}/films_server:latest'
 
       
 
