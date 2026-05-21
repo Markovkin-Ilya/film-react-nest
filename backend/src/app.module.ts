@@ -14,11 +14,7 @@ import { Schedule } from './films/entity/schedule';
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: '43542',
-      database: 'prac',
+      url: process.env.DATABASE_URL,
       entities: [Film, Schedule],
       synchronize: true,
     }),
