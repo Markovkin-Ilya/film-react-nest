@@ -29,7 +29,7 @@ services:
       - network
 
   frontend:
-    image: 'ghcr.io/markovkin-ilya/film_frontend'
+    image: 'ghcr.io/markovkin-ilya/films_frontend'
     build:
       context: frontend
     environment:
@@ -40,7 +40,7 @@ services:
       - frontend_data:/app/dist
   
   backend:
-    image: 'ghcr.io/markovkin-ilya/film_backend'
+    image: 'ghcr.io/markovkin-ilya/films_backend'
     build:
       context: backend
     environment:
@@ -58,7 +58,7 @@ services:
       - database
 
   server:
-    image: 'ghcr.io/markovkin-ilya/film_server'
+    image: 'ghcr.io/markovkin-ilya/films_server'
     build:
       context: nginx
     ports:
