@@ -1,0 +1,78 @@
+version: '2.2'
+services:
+  database:
+    image: postgres:16.4
+    restart: unless-stopped
+    environment:
+      POSTSGRES_USER: ${POSTSGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_USER: ${DATABASE_USERNAME}
+      DB_PASSWORD: ${DATABASE_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4_container
+    restart: always
+    ports:
+      - '8080:80'
+    env_file: .env
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - network
+
+  frontend:
+    image: 'ghcr.io/markovkin-ilya/films_frontend:latest'
+    environment:
+      VITE_BASE_URL: /
+      VITE_API_URL: /api/afisha
+      VITE_CDN_URL: /content/afisha
+    volumes:
+      - frontend_data:/app/dist
+    command: nginx -g "daemon off;"
+
+  backend:
+    image: 'ghcr.io/markovkin-ilya/films_backend:latest'
+    environment:
+      PORT: 3000
+      DEBUG: '*'
+      DATABASE_DRIVER: 'postgres'
+      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - 3000:3000
+    networks:
+      - network
+    depends_on:
+      - database
+
+  server:
+    image: 'ghcr.io/markovkin-ilya/films_server:latest'
+    ports:
+      - 81:80
+    volumes:
+      - frontend_data:/var/www
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - network
+    command: nginx -g "daemon off;"
+
+volumes:
+  db_data:
+  pgadmin_data:
+  frontend_data:
+
+networks:
+  network:
+    driver: bridge
